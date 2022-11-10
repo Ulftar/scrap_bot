@@ -8,14 +8,15 @@ def collect_data(city_code='2398'):
     """Текущие дата и временя"""
     cur_time = datetime.datetime.now().strftime('%d_%m_%Y_%H_%M')
     """Юзерагент"""
-    ua = UserAgent()
+    ua = UserAgent().random
 
     """Словарь заголовков с сайта, HeadersRequests"""
     headers = {
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,'
                   'image/avif,image/webp,image/apng,*/*;q=0.8,'
                   'application/signed-exchange;v=b3;q=0.9',
-        'User-Agent': ua.random,
+        'User-Agent': ua,
+        'X-Requested-With': 'XMLHttpRequest'
     }
 
     """Словарь кодов городов с сайта, Cookies"""
@@ -26,9 +27,44 @@ def collect_data(city_code='2398'):
     """Запрос на сайт"""
     response = requests.get(url='https://magnit.ru/promo/', headers=headers, cookies=cookies)
 
-    """Сохранение полученных данных в файл"""
-    with open(f'index.html', 'w', encoding='UTF-8') as file:
-        file.write(response.text)
+    # """Сохранение полученных данных в файл"""
+    # with open('index.html', 'w', encoding='UTF-8') as file:
+    #     file.write(response.text)
+
+    """Работа с полученными данными"""
+    with open('index.html', 'r', encoding='UTF-8') as file:
+        src = file.read()
+
+    soup = BeautifulSoup(src, 'lxml')
+
+    """Поиск города в тегах сайта"""
+    city = soup.find('a', class_='header__contacts-link_city').text.strip()
+    """Сбор всех карточек товаров со страницы"""
+    cards = soup.find_all('a', class_='card-sale_catalogue')
+    #print(city, len(cards))
+
+    """Проходим по списку с карточками товаров"""
+    for card in cards:
+        card_title = card.find('div', class_='card-sale__title').text.strip()
+
+        """Проверка на присутствие скидки в блоке div, т.к. на сайте есть товары без скидок"""
+        try:
+            card_discount = card.find('div', class_='card-sale__discount').text.strip()
+        except AttributeError:
+            continue
+
+        """Сбор данных цен без скидок и цен со скидками"""
+        card_price_old_integer = card.find('div', class_='label__price_old').find(
+                                           'span', class_='label__price-integer').text.strip()
+        card_price_old_decimal = card.find('div', class_='label__price_old').find(
+                                           'span', class_='label__price-decimal').text.strip()
+        card_old_price = f'{card_price_old_integer}.{card_price_old_decimal}'
+
+        card_price_integer = card.find('div', class_='label__price_new').find(
+                                       'span', class_='label__price-integer').text.strip()
+        card_price_decimal = card.find('div', class_='label__price_new').find(
+                                       'span', class_='label__price-decimal').text.strip()
+        card_price = f'{card_price_integer}.{card_price_decimal}'
 
 def main():
     collect_data(city_code='2398')
