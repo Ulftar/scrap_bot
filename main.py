@@ -55,73 +55,73 @@ def collect_data(city_code='2398'):
             'Page': f'{page}'
         }
 
-    response = requests.post(
-        url='https://magnit.ru/promo/',
-        headers=headers,
-        cookies=cookies,
-        page_count=page_count,
-    ).text
-    soup = BeautifulSoup(response, 'lxml')
+        response = requests.post(
+            url='https://magnit.ru/promo/',
+            headers=headers,
+            cookies=cookies,
+            data=page_count,
+        ).text
+        soup = BeautifulSoup(response, 'lxml')
 
-    cards = soup.find_all('a', class_='card-sale_catalogue')
+        cards = soup.find_all('a', class_='card-sale_catalogue')
 
-    """Проходим по списку с карточками товаров"""
-    for card in cards:
-        card_title = card.find('div', class_='card-sale__title').text.strip()
+        """"Проходим по списку с карточками товаров"""
+        for card in cards:
+            card_title = card.find('div', class_='card-sale__title').text.strip()
 
-        """Проверка на присутствие скидки в блоке div, т.к. на сайте есть товары без скидок"""
-        try:
-            card_discount = card.find('div', class_='card-sale__discount').text.strip()
-        except AttributeError:
-            continue
+            """Проверка на присутствие скидки в блоке div, т.к. на сайте есть товары без скидок"""
+            try:
+                card_discount = card.find('div', class_='card-sale__discount').text.strip()
+            except AttributeError:
+                continue
 
-        card_title = card.find('div', class_='card-sale__discount').text.strip()
+            card_title = card.find('div', class_='card-sale__discount').text.strip()
 
-        """Сбор данных цен без скидок и цен со скидками"""
-        card_price_old_integer = card.find('div', class_='label__price_old').find(
+            """Сбор данных цен без скидок и цен со скидками"""
+            card_price_old_integer = card.find('div', class_='label__price_old').find(
+                                               'span', class_='label__price-integer').text.strip()
+            card_price_old_decimal = card.find('div', class_='label__price_old').find(
+                                               'span', class_='label__price-decimal').text.strip()
+            card_old_price = f'{card_price_old_integer}.{card_price_old_decimal}'
+
+            card_price_integer = card.find('div', class_='label__price_new').find(
                                            'span', class_='label__price-integer').text.strip()
-        card_price_old_decimal = card.find('div', class_='label__price_old').find(
+            card_price_decimal = card.find('div', class_='label__price_new').find(
                                            'span', class_='label__price-decimal').text.strip()
-        card_old_price = f'{card_price_old_integer}.{card_price_old_decimal}'
+            card_price = f'{card_price_integer}.{card_price_decimal}'
 
-        card_price_integer = card.find('div', class_='label__price_new').find(
-                                       'span', class_='label__price-integer').text.strip()
-        card_price_decimal = card.find('div', class_='label__price_new').find(
-                                       'span', class_='label__price-decimal').text.strip()
-        card_price = f'{card_price_integer}.{card_price_decimal}'
+            """Сбор данных дат скидок"""
+            card_sale_date: object = card.find('div', class_='card-sale__date').text.strip().replace('\n', ' ')
+            #print(card_sale_date)
 
-        """Сбор данных дат скидок"""
-        card_sale_date: object = card.find('div', class_='card-sale__date').text.strip().replace('\n', ' ')
-        #print(card_sale_date)
-
-        """Добавляем собранные данные в список"""
-        data.append(
-            [
-                card_title,
-                card_old_price,
-                card_price,
-                card_discount,
-                card_sale_date,
-            ]
-        )
-
-
-    """Запись в CSV файл"""
-    with open(f'{city}_{cur_time}.csv', 'w', encoding='UTF-8') as file:
-        writer = csv.writer(file)
-
-        writer.writerow(
-            (
-                'Продукт',
-                'Старая цена',
-                'Новая цена',
-                'Процент скидки',
-                'Время акции',
+            """Добавляем собранные данные в список"""
+            data.append(
+                [
+                    card_title,
+                    card_old_price,
+                    card_price,
+                    card_discount,
+                    card_sale_date,
+                ]
             )
-        )
-        writer.writerows(
-            data
-        )
+
+
+        """Запись в CSV файл"""
+        with open(f'{city}_{cur_time}.csv', 'w', encoding='UTF-8') as file:
+            writer = csv.writer(file)
+
+            writer.writerow(
+                (
+                    'Продукт',
+                    'Старая цена',
+                    'Новая цена',
+                    'Процент скидки',
+                    'Время акции',
+                )
+            )
+            writer.writerows(
+                data
+            )
 
     print(f'Файл {city}_{cur_time}.csv успешно записан.')
 
