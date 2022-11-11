@@ -44,20 +44,8 @@ def collect_data(city_code='2398'):
     cards = soup.find_all('a', class_='card-sale_catalogue')
     #print(city, len(cards))
 
-    """Запись в CSV файл"""
-    with open(f'{city}_{cur_time}.csv', 'w', encoding='UTF-8') as file:
-        writer = csv.writer(file)
 
-        writer.writerow(
-            (
-                'Продукт',
-                'Старая цена',
-                'Новая цена',
-                'Процент скидки',
-                'Время акции',
-            )
-        )
-
+    data = []
     """Проходим по списку с карточками товаров"""
     for card in cards:
         card_title = card.find('div', class_='card-sale__title').text.strip()
@@ -85,20 +73,34 @@ def collect_data(city_code='2398'):
         card_sale_date: object = card.find('div', class_='card-sale__date').text.strip().replace('\n', ' ')
         #print(card_sale_date)
 
-        """Добавление собранных данных в CSV"""
-        with open(f'{city}_{cur_time}.csv', 'a', encoding='UTF-8') as file:
-            writer = csv.writer(file)
+        """Добавляем собранные данные в список"""
+        data.append(
+            [
+                card_title,
+                card_old_price,
+                card_price,
+                card_discount,
+                card_sale_date,
+            ]
+        )
 
-            writer.writerow(
-                (
-                    card_title,
-                    card_old_price,
-                    card_price,
-                    card_discount,
-                    card_sale_date,
-                )
+
+    """Запись в CSV файл"""
+    with open(f'{city}_{cur_time}.csv', 'w', encoding='UTF-8') as file:
+        writer = csv.writer(file)
+
+        writer.writerow(
+            (
+                'Продукт',
+                'Старая цена',
+                'Новая цена',
+                'Процент скидки',
+                'Время акции',
             )
-
+        )
+        writer.writerows(
+            data
+        )
 
     print(f'Файл {city}_{cur_time}.csv успешно записан.')
 
