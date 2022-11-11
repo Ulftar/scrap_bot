@@ -66,6 +66,10 @@ def collect_data(city_code='2398'):
                                        'span', class_='label__price-decimal').text.strip()
         card_price = f'{card_price_integer}.{card_price_decimal}'
 
+        """Сбор данных дат скидок"""
+        card_sale_date: object = card.find('div', class_='card-sale__date').text.strip().replace('\n', ' ')
+        print(card_sale_date)
+
 def main():
     collect_data(city_code='2398')
 
