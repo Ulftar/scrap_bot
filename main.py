@@ -26,7 +26,7 @@ def collect_data(city_code='2398'):
     }
 
     """Запрос на сайт"""
-    response = requests.get(url='https://magnit.ru/promo/', headers=headers, cookies=cookies)
+    response = requests.get(url='https://magnit.ru/promo/', headers=headers, cookies=cookies).text
 
     # """Сохранение полученных данных в файл"""
     # with open('index.html', 'w', encoding='UTF-8') as file:
@@ -36,16 +36,35 @@ def collect_data(city_code='2398'):
     # with open('index.html', 'r', encoding='UTF-8') as file:
     #     src = file.read()
 
-    soup = BeautifulSoup(response.text, 'lxml')
+    soup = BeautifulSoup(response, 'lxml')
 
     """Поиск города в тегах сайта"""
     city = soup.find('a', class_='header__contacts-link_city').text.strip()
     """Сбор всех карточек товаров со страницы"""
-    cards = soup.find_all('a', class_='card-sale_catalogue')
+    #cards = soup.find_all('a', class_='card-sale_catalogue')
     #print(city, len(cards))
 
 
     data = []
+    page = 1  #Начальная страница цикла
+
+    """Обход подгрузки карточек товаров на сайте.
+    Работает до тех пор, пока карточки приходят в ответ на запрос"""
+    while response:
+        page_count = {
+            'Page': f'{page}'
+        }
+
+    response = requests.post(
+        url='https://magnit.ru/promo/',
+        headers=headers,
+        cookies=cookies,
+        page_count=page_count,
+    ).text
+    soup = BeautifulSoup(response, 'lxml')
+
+    cards = soup.find_all('a', class_='card-sale_catalogue')
+
     """Проходим по списку с карточками товаров"""
     for card in cards:
         card_title = card.find('div', class_='card-sale__title').text.strip()
@@ -55,6 +74,8 @@ def collect_data(city_code='2398'):
             card_discount = card.find('div', class_='card-sale__discount').text.strip()
         except AttributeError:
             continue
+
+        card_title = card.find('div', class_='card-sale__discount').text.strip()
 
         """Сбор данных цен без скидок и цен со скидками"""
         card_price_old_integer = card.find('div', class_='label__price_old').find(
