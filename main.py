@@ -32,11 +32,11 @@ def collect_data(city_code='2398'):
     # with open('index.html', 'w', encoding='UTF-8') as file:
     #     file.write(response.text)
 
-    """Работа с полученными данными"""
-    with open('index.html', 'r', encoding='UTF-8') as file:
-        src = file.read()
+    # """Работа с полученными данными"""
+    # with open('index.html', 'r', encoding='UTF-8') as file:
+    #     src = file.read()
 
-    soup = BeautifulSoup(src, 'lxml')
+    soup = BeautifulSoup(response.text(), 'lxml')
 
     """Поиск города в тегах сайта"""
     city = soup.find('a', class_='header__contacts-link_city').text.strip()
