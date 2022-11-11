@@ -36,7 +36,7 @@ def collect_data(city_code='2398'):
     # with open('index.html', 'r', encoding='UTF-8') as file:
     #     src = file.read()
 
-    soup = BeautifulSoup(response.text(), 'lxml')
+    soup = BeautifulSoup(response.text, 'lxml')
 
     """Поиск города в тегах сайта"""
     city = soup.find('a', class_='header__contacts-link_city').text.strip()
@@ -101,6 +101,7 @@ def collect_data(city_code='2398'):
 
 
     print(f'Файл {city}_{cur_time}.csv успешно записан.')
+
 
 def main():
     collect_data(city_code='2398')
