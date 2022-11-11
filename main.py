@@ -1,4 +1,5 @@
 import datetime
+import csv
 import requests
 from bs4 import BeautifulSoup
 from fake_useragent import UserAgent
@@ -10,7 +11,7 @@ def collect_data(city_code='2398'):
     """Юзерагент"""
     ua = UserAgent().random
 
-    """Словарь заголовков с сайта, HeadersRequests"""
+    """Формируем заголовки с сайта, HeadersRequests"""
     headers = {
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,'
                   'image/avif,image/webp,image/apng,*/*;q=0.8,'
@@ -19,7 +20,7 @@ def collect_data(city_code='2398'):
         'X-Requested-With': 'XMLHttpRequest'
     }
 
-    """Словарь кодов городов с сайта, Cookies"""
+    """Формируем коды городов с сайта, Cookies"""
     cookies = {
         'mg_geo_id': f'{city_code}'
     }
@@ -42,6 +43,20 @@ def collect_data(city_code='2398'):
     """Сбор всех карточек товаров со страницы"""
     cards = soup.find_all('a', class_='card-sale_catalogue')
     #print(city, len(cards))
+
+    """Запись в CSV файл"""
+    with open(f'{city}_{cur_time}.csv', 'w', encoding='UTF-8') as file:
+        writer = csv.writer(file)
+
+        writer.writerow(
+            (
+                'Продукт',
+                'Старая цена',
+                'Новая цена',
+                'Процент скидки',
+                'Время акции',
+            )
+        )
 
     """Проходим по списку с карточками товаров"""
     for card in cards:
@@ -68,7 +83,24 @@ def collect_data(city_code='2398'):
 
         """Сбор данных дат скидок"""
         card_sale_date: object = card.find('div', class_='card-sale__date').text.strip().replace('\n', ' ')
-        print(card_sale_date)
+        #print(card_sale_date)
+
+        """Добавление собранных данных в CSV"""
+        with open(f'{city}_{cur_time}.csv', 'a', encoding='UTF-8') as file:
+            writer = csv.writer(file)
+
+            writer.writerow(
+                (
+                    card_title,
+                    card_old_price,
+                    card_price,
+                    card_discount,
+                    card_sale_date,
+                )
+            )
+
+
+    print(f'Файл {city}_{cur_time}.csv успешно записан.')
 
 def main():
     collect_data(city_code='2398')
