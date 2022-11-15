@@ -6,6 +6,7 @@ from fake_useragent import UserAgent
 import aiohttp
 import aiofiles
 import asyncio
+from aiocsv import AsyncWriter
 
 
 async def collect_data(city_code='2398'):
@@ -84,10 +85,10 @@ async def collect_data(city_code='2398'):
 
 
     """Запись в CSV файл"""
-    with open(f'{city}_{cur_time}.csv', 'w', encoding='UTF-8') as file:
-        writer = csv.writer(file)
+    async with aiofiles.open(f'{city}_{cur_time}.csv', 'w', encoding='UTF-8') as file:
+        writer = AsyncWriter.writer(file)
 
-        writer.writerow(
+        await writer.writerow(
             (
                 'Продукт',
                 'Старая цена',
@@ -96,7 +97,7 @@ async def collect_data(city_code='2398'):
                 'Время акции',
             )
         )
-        writer.writerows(
+        await writer.writerows(
             data
         )
 
