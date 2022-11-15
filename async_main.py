@@ -30,7 +30,7 @@ async def collect_data(city_code='2398'):
     }
 
     """Создание сессии"""
-    async with aiohttp.ClientRequest() as session:
+    async with aiohttp.ClientSession() as session:
         """Запрос на сайт"""
         response = await session.get(url='https://magnit.ru/promo/', headers=headers, cookies=cookies)
 
@@ -41,7 +41,6 @@ async def collect_data(city_code='2398'):
         city = soup.find('a', class_='header__contacts-link_city').text.strip()
         """Сбор всех карточек товаров со страницы"""
         cards = soup.find_all('a', class_='card-sale_catalogue')
-        #print(city, len(cards))
 
 
         data = []
@@ -86,7 +85,7 @@ async def collect_data(city_code='2398'):
 
     """Запись в CSV файл"""
     async with aiofiles.open(f'{city}_{cur_time}.csv', 'w', encoding='UTF-8') as file:
-        writer = AsyncWriter.writer(file)
+        writer = AsyncWriter(file)
 
         await writer.writerow(
             (
@@ -101,12 +100,12 @@ async def collect_data(city_code='2398'):
             data
         )
 
-    print(f'Файл {city}_{cur_time}.csv успешно записан.')
+    return f'Файл {city}_{cur_time}.csv'
 
 
-def main():
-    collect_data(city_code='2398')
+async def main():
+    await collect_data(city_code='2398')
 
 
 if __name__ == '__main__':
-    main()
+    asyncio.run(main())
