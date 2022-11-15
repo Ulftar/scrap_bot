@@ -75,7 +75,7 @@ def collect_data(city_code='2398'):
             except AttributeError:
                 continue
 
-            card_title = card.find('div', class_='card-sale__discount').text.strip()
+            card_discount = card.find('div', class_='card-sale__discount').text.strip()
 
             """Сбор данных цен без скидок и цен со скидками"""
             card_price_old_integer = card.find('div', class_='label__price_old').find(
