@@ -11,7 +11,11 @@ dp = Dispatcher(bot)
 """Создание функции ответа на команду старт"""
 @dp.message_handler(commands='start')
 async def start(message: types.Message):
-    await message.answer('Hello!')
+    start_buttons = ['Москва', 'Новосибирск', 'Екатеринбург']
+    keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
+    keyboard.add(*start_buttons)
+
+    await message.answer('Выберите город', reply_markup=keyboard)
 
 
 if __name__ == '__main__':
