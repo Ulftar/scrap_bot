@@ -69,7 +69,6 @@ async def collect_data(city_code='2398'):
 
             """Сбор данных дат скидок"""
             card_sale_date: object = card.find('div', class_='card-sale__date').text.strip().replace('\n', ' ')
-            #print(card_sale_date)
 
             """Добавляем собранные данные в список"""
             data.append(
@@ -85,7 +84,7 @@ async def collect_data(city_code='2398'):
 
     """Запись в CSV файл"""
     async with aiofiles.open(f'{city}_{cur_time}.csv', 'w', encoding='UTF-8') as file:
-        writer = AsyncWriter(file)
+        writer = AsyncWriter(file, lineterminator='\n')
 
         await writer.writerow(
             (
