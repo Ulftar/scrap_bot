@@ -1,6 +1,7 @@
 from aiogram import Bot, Dispatcher, executor, types
 from aiogram.dispatcher.filters import Text
 from async_main import collect_data
+from iofiles import os
 import auth_data
 
 """Создание объекта бота"""
@@ -43,9 +44,12 @@ async def ekb_city(message: types.Message):
     await  send_data(city_code='1869', chat_id=chat_id)
 
 
+"""Отправка файла в бот"""
 async def send_data(city_code='2398', chat_id=''):
     file = await collect_data(city_code=city_code)
     await bot.send_document(chat_id=chat_id, document=open(file, 'rb'))
+    """Удаление файла"""
+    await os.remove(file)
 
 
 if __name__ == '__main__':
