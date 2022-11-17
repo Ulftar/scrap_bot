@@ -18,5 +18,23 @@ async def start(message: types.Message):
     await message.answer('Выберите город', reply_markup=keyboard)
 
 
+"""Обработчик кнопки Москва. Декоратор проверяет точное соответствие текста"""
+@dp.message_handler(Text(equals='Москва'))
+async def moscow_city(message: types.Message):
+    await message.answer('Подождите...')
+
+
+"""Обработчик кнопки Новосибирск"""
+@dp.message_handler(Text(equals='Новосибирск'))
+async def nsk_city(message: types.Message):
+    await message.answer('Подождите...')
+
+
+"""Обработчик кнопки Екатеринбург"""
+@dp.message_handler(Text(equals='Екатеринбург'))
+async def ekb_city(message: types.Message):
+    await message.answer('Подождите...')
+
+
 if __name__ == '__main__':
     executor.start_polling(dp)
